@@ -7,7 +7,8 @@ Postpone and store method executions in repository with single spring annotation
 Just simply annotate your service's method with @Postponable and it will be marked to postponed execution. This means
 that the method will not be executed, despite its invocation. Instead, the repository (pointed as annotation parameter)
 will store the invocation info. The PostponedMethodInvoker service gets postponed method invocations from repository and
-invokes them asynchronously.
+invokes them asynchronously. Use the @EnablePostpones in your @Configuration beans to enable proxying methods marked as
+@Postponable.
 
 ## Runing the example
 
@@ -37,7 +38,7 @@ details).
 
 ## Requirements
 
-You need a running and accessible mongodb instance on localhost to run the example
+You need a running and accessible mongodb instance on localhost to run the example.
 
 ## Runing tests
 
