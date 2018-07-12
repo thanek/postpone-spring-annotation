@@ -11,6 +11,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -32,8 +33,10 @@ public class PostponedOperationsInvoker {
             try {
                 invokeMethod(invocation);
                 repository.markAsDone(invocation);
+            } catch (InvocationTargetException e) {
+                ReflectionUtils.rethrowRuntimeException(e.getTargetException());
             } catch (ClassNotFoundException | NoSuchMethodException
-                    | IllegalAccessException | InvocationTargetException e) {
+                    | IllegalAccessException e) {
                 logger.error("Could not invoke {}:", invocation, e);
             }
         });
@@ -50,6 +53,7 @@ public class PostponedOperationsInvoker {
 
             logger.info("Invoking {} on target {}", invocation, bean.getClass());
             Method method = getDeclaredMethod(invocation, bean);
+            ReflectionUtils.makeAccessible(method);
             method.invoke(bean, invocation.getArguments());
         } finally {
             if (postponeAdvisor != null) {
