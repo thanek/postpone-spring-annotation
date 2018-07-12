@@ -84,7 +84,6 @@ public class PostponedMethodInvocationTests {
     }
 
     public static class Service {
-
         private boolean stuffDone = false;
 
         @Postponable(repository = InMemoryRepository.class)
@@ -119,7 +118,6 @@ public class PostponedMethodInvocationTests {
         }
 
         public int count() {
-            System.err.println(memory);
             return memory.size();
         }
     }
