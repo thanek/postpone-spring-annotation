@@ -1,4 +1,4 @@
-# postpone-sprint-annotation
+# postpone-spring-annotation
 
 Postpone and store method executions in repository with single spring annotation
 
