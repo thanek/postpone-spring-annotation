@@ -3,7 +3,6 @@ package net.schowek.xis.spring.postpones;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInterceptor;
@@ -41,9 +40,9 @@ public class AnnotationsAwarePostponesInterceptor implements IntroductionInterce
                 }
                 Map<Method, MethodInterceptor> delegatesForTarget = this.delegates.get(target);
                 if (!delegatesForTarget.containsKey(method)) {
-                    Postponable postponable = AnnotationUtils.findAnnotation(method, Postponable.class);
-                    if (postponable != null) {
-                        InvocationRepository repository = applicationContext.getBean(postponable.repository());
+                    Postponable annotation = AnnotationUtils.findAnnotation(method, Postponable.class);
+                    if (annotation != null) {
+                        InvocationRepository repository = applicationContext.getBean(annotation.repository());
                         MethodInterceptor delegate = new PostponesInterceptor(repository);
                         delegatesForTarget.put(method, delegate);
                     }

@@ -1,7 +1,6 @@
 package net.schowek.xis.example.storage;
 
 import java.time.Instant;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -17,3 +17,8 @@ To actually invoke the "hello" method:
 ```
 curl localhost:8080/run
 ```
+
+
+## Requirements
+
+You need a running and accessible mongodb instance on localhost to run the example
