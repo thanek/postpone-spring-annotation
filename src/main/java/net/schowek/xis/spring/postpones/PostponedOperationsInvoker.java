@@ -15,14 +15,14 @@ import org.springframework.stereotype.Service;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
-public class PostponedMethodInvoker {
-    private static final Logger logger = getLogger(PostponedMethodInvoker.class);
+public class PostponedOperationsInvoker {
+    private static final Logger logger = getLogger(PostponedOperationsInvoker.class);
     private final ApplicationContext applicationContext;
     private final InvocationRepository repository;
     private final Map<Class, Object> beansCache = new HashMap<>();
 
     @Autowired
-    public PostponedMethodInvoker(ApplicationContext applicationContext, InvocationRepository repository) {
+    public PostponedOperationsInvoker(ApplicationContext applicationContext, InvocationRepository repository) {
         this.applicationContext = applicationContext;
         this.repository = repository;
     }
@@ -32,13 +32,15 @@ public class PostponedMethodInvoker {
             try {
                 invokeMethod(invocation);
                 repository.markAsDone(invocation);
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException
+                    | IllegalAccessException | InvocationTargetException e) {
                 logger.error("Could not invoke {}:", invocation, e);
             }
         });
     }
 
-    private void invokeMethod(Invocation invocation) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    private void invokeMethod(Invocation invocation) throws ClassNotFoundException, NoSuchMethodException,
+            IllegalAccessException, InvocationTargetException {
         Object bean = getTargetBean(invocation);
         Advisor postponeAdvisor = null;
         try {
