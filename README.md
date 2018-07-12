@@ -10,7 +10,7 @@ will store the invocation info. The `PostponedMethodInvoker` service gets postpo
 invokes them asynchronously. Use the `@EnablePostpones` in your @Configuration beans to enable proxying methods marked as
 `@Postponable`.
 
-## Runing the example
+## Running the example
 
 ```
 ./gradlew bootRun
@@ -40,7 +40,7 @@ details).
 
 You need a running and accessible mongodb instance on localhost to run the example.
 
-## Runing tests
+## Running tests
 
 ```
 ./gradlew test
