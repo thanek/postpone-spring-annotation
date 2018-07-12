@@ -24,6 +24,6 @@ public class HelloController {
 
     @GetMapping("/run")
     public void run() {
-        postponedMethodInvoker.invokeQueuedMethods();
+        postponedMethodInvoker.invokeQueued();
     }
 }

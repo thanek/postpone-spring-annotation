@@ -58,7 +58,7 @@ public class PostponedMethodInvocationTests {
                 "doStuff", new Class[0], new Object[0]));
 
         PostponedMethodInvoker methodInvoker = new PostponedMethodInvoker(context, repository);
-        methodInvoker.invokeQueuedMethods();
+        methodInvoker.invokeQueued();
 
         assertTrue(service.isStuffDone());
         assertEquals(0, repository.count());

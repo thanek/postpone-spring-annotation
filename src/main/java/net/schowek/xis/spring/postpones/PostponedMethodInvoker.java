@@ -27,7 +27,7 @@ public class PostponedMethodInvoker {
         this.repository = repository;
     }
 
-    public void invokeQueuedMethods() {
+    public void invokeQueued() {
         repository.findFirst().ifPresent(invocation -> {
             try {
                 invokeMethod(invocation);
