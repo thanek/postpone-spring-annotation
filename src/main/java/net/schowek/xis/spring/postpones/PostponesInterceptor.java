@@ -26,7 +26,7 @@ public class PostponesInterceptor implements MethodInterceptor {
                 clazz.getCanonicalName(), method.getName(), method.getParameterTypes(),
                 methodInvocation.getArguments());
 
-        logger.info("Postponing invocation {}", invocation);
+        logger.debug("Postponing invocation {}", invocation);
         repository.add(invocation);
 
         return null;

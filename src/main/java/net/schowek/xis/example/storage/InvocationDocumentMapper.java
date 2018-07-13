@@ -6,7 +6,7 @@ import net.schowek.xis.spring.postpones.Invocation;
 import static java.util.Arrays.stream;
 
 public class InvocationDocumentMapper {
-    public static InvocationDocument toDocument(Invocation invocation, Status status) {
+    static InvocationDocument toDocument(Invocation invocation, Status status) {
         InvocationDocument document = new InvocationDocument();
         document.setId(invocation.getId());
         document.setCreatedAt(invocation.getCreatedAt());
@@ -19,7 +19,7 @@ public class InvocationDocumentMapper {
         return document;
     }
 
-    public static Invocation fromDocument(InvocationDocument document) {
+    static Invocation fromDocument(InvocationDocument document) {
         Class[] parameterTypes = stream(document.getParameterTypes()).map(InvocationDocumentMapper::getClass).toArray(Class[]::new);
         return new Invocation(document.getId(), document.getCreatedAt(), document.getClazz(),
                 document.getMethod(), parameterTypes, document.getArguments());

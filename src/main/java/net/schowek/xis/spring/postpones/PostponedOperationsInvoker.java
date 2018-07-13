@@ -51,7 +51,7 @@ public class PostponedOperationsInvoker {
                 postponeAdvisor = temporaryDisablePostponeAdvisor((Advised) bean);
             }
 
-            logger.info("Invoking {} on target {}", invocation, bean.getClass());
+            logger.debug("Invoking {} on target {}", invocation, bean.getClass());
             Method method = getDeclaredMethod(invocation, bean);
             ReflectionUtils.makeAccessible(method);
             method.invoke(bean, invocation.getArguments());
