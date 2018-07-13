@@ -42,11 +42,12 @@ public class PostponedMethodsScanner {
                     Postponable annotation = method.getAnnotation(Postponable.class);
 
                     PostponedMethod postponedMethod = new PostponedMethod(bean, method);
-                    qualifiers.put(getQualifier(annotation.methodQualifier(), postponedMethod), postponedMethod);
+                    String qualifier = getQualifier(annotation.methodQualifier(), postponedMethod);
+                    qualifiers.put(qualifier, postponedMethod);
 
                     InvocationRepository repository = applicationContext.getBean(annotation.repository());
                     postponesInterceptors.put(defaultQualifier(postponedMethod),
-                            new PostponesInterceptor(repository, annotation.methodQualifier()));
+                            new PostponesInterceptor(repository, qualifier));
                 }
             }
         }
