@@ -1,7 +1,11 @@
 package net.schowek.xis.spring.postpones;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -9,12 +13,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
+import static java.util.Arrays.stream;
 import static net.schowek.xis.spring.postpones.PostponedMethod.defaultQualifier;
-import static org.springframework.aop.support.AopUtils.*;
+import static org.springframework.aop.support.AopUtils.isAopProxy;
+import static org.springframework.aop.support.AopUtils.isCglibProxy;
 import static org.springframework.util.StringUtils.isEmpty;
 
 @Component
@@ -31,10 +33,17 @@ public class PostponedMethodsScanner {
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws BeansException {
+        InvocationRepository repository =
+                stream(applicationContext.getBeanNamesForAnnotation(EnablePostpones.class))
+                        .findAny().map(beanName -> {
+                    EnablePostpones annotation = applicationContext.findAnnotationOnBean(beanName, EnablePostpones.class);
+                    return applicationContext.getBean(annotation.repository());
+                }).orElse(null);
+
         for (Object bean : applicationContext.getBeansOfType(Object.class).values()) {
             Class<?> beanClass = bean.getClass();
-            if (isAopProxy(bean)) {
-                beanClass = getTargetClass(bean);
+            if (isAopProxy(bean) || isCglibProxy(bean)) {
+                beanClass = AopUtils.getTargetClass(bean);
             }
 
             for (Method method : beanClass.getDeclaredMethods()) {
@@ -45,7 +54,6 @@ public class PostponedMethodsScanner {
                     String qualifier = getQualifier(annotation.methodQualifier(), postponedMethod);
                     qualifiers.put(qualifier, postponedMethod);
 
-                    InvocationRepository repository = applicationContext.getBean(annotation.repository());
                     postponesInterceptors.put(defaultQualifier(postponedMethod),
                             new PostponesInterceptor(repository, qualifier));
                 }

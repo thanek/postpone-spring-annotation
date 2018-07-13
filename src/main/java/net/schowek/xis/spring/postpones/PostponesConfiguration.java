@@ -1,5 +1,8 @@
 package net.schowek.xis.spring.postpones;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import javax.annotation.PostConstruct;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -11,10 +14,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
-
-import javax.annotation.PostConstruct;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 
 @Configuration
 public class PostponesConfiguration extends AbstractPointcutAdvisor {
@@ -29,6 +28,11 @@ public class PostponesConfiguration extends AbstractPointcutAdvisor {
     @Bean
     public PostponedMethodsScanner postponedMethodsScanner() {
         return new PostponedMethodsScanner(applicationContext);
+    }
+
+    @Bean
+    public PostponedOperationsInvoker postponedOperationsInvoker() {
+        return new PostponedOperationsInvoker(applicationContext.getBean(InvocationRepository.class), postponedMethodsScanner());
     }
 
     @PostConstruct

@@ -1,11 +1,10 @@
 package net.schowek.xis.example.storage;
 
+import java.util.Optional;
 import net.schowek.xis.spring.postpones.Invocation;
 import net.schowek.xis.spring.postpones.InvocationRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 import static net.schowek.xis.example.storage.InvocationDocument.Status.RUNNING;
 import static net.schowek.xis.example.storage.InvocationDocument.Status.WAITING;

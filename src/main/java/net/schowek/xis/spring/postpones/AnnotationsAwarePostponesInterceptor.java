@@ -1,11 +1,10 @@
 package net.schowek.xis.spring.postpones;
 
+import java.lang.reflect.Method;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.core.annotation.AnnotationUtils;
-
-import java.lang.reflect.Method;
 
 public class AnnotationsAwarePostponesInterceptor implements IntroductionInterceptor {
     private final PostponedMethodsScanner postponedMethodsCache;

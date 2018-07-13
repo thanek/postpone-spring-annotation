@@ -1,25 +1,20 @@
 package net.schowek.xis.spring.postpones;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Service
 public class PostponedOperationsInvoker {
     private static final Logger logger = getLogger(PostponedOperationsInvoker.class);
     private final InvocationRepository repository;
     private final PostponedMethodsScanner postponedMethods;
 
-    @Autowired
     public PostponedOperationsInvoker(InvocationRepository repository, PostponedMethodsScanner postponedMethods) {
         this.repository = repository;
         this.postponedMethods = postponedMethods;
