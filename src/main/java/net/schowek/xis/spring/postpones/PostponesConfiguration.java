@@ -1,8 +1,5 @@
 package net.schowek.xis.spring.postpones;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import javax.annotation.PostConstruct;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -11,8 +8,13 @@ import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.support.annotation.AnnotationMethodMatcher;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
+
+import javax.annotation.PostConstruct;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 @Configuration
 public class PostponesConfiguration extends AbstractPointcutAdvisor {
@@ -22,6 +24,11 @@ public class PostponesConfiguration extends AbstractPointcutAdvisor {
 
     public PostponesConfiguration(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    @Bean
+    public PostponedMethodsScanner postponedMethodsScanner() {
+        return new PostponedMethodsScanner(applicationContext);
     }
 
     @PostConstruct
@@ -41,7 +48,7 @@ public class PostponesConfiguration extends AbstractPointcutAdvisor {
     }
 
     private Advice buildAdvice() {
-        return new AnnotationsAwarePostponesInterceptor(applicationContext);
+        return new AnnotationsAwarePostponesInterceptor(postponedMethodsScanner());
     }
 
     private Pointcut buildPointcut() {
@@ -50,7 +57,6 @@ public class PostponesConfiguration extends AbstractPointcutAdvisor {
     }
 
     private final class AnnotationMethodPointcut extends StaticMethodMatcherPointcut {
-
         private final MethodMatcher methodResolver;
 
         AnnotationMethodPointcut(Class<? extends Annotation> annotationType) {

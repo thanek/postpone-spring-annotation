@@ -1,20 +1,17 @@
 package net.schowek.xis.spring.postpones;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInterceptor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 
-public class AnnotationsAwarePostponesInterceptor implements IntroductionInterceptor {
-    private final Map<Object, Map<Method, MethodInterceptor>> delegates = new HashMap<>();
-    private final ApplicationContext applicationContext;
+import java.lang.reflect.Method;
 
-    AnnotationsAwarePostponesInterceptor(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+public class AnnotationsAwarePostponesInterceptor implements IntroductionInterceptor {
+    private final PostponedMethodsScanner postponedMethodsCache;
+
+    AnnotationsAwarePostponesInterceptor(PostponedMethodsScanner postponedMethodsCache) {
+        this.postponedMethodsCache = postponedMethodsCache;
     }
 
     @Override
@@ -33,22 +30,11 @@ public class AnnotationsAwarePostponesInterceptor implements IntroductionInterce
     }
 
     private MethodInterceptor getDelegate(Object target, Method method) {
-        if (!this.delegates.containsKey(target) || !this.delegates.get(target).containsKey(method)) {
-            synchronized (this.delegates) {
-                if (!this.delegates.containsKey(target)) {
-                    this.delegates.put(target, new HashMap<>());
-                }
-                Map<Method, MethodInterceptor> delegatesForTarget = this.delegates.get(target);
-                if (!delegatesForTarget.containsKey(method)) {
-                    Postponable annotation = AnnotationUtils.findAnnotation(method, Postponable.class);
-                    if (annotation != null) {
-                        InvocationRepository repository = applicationContext.getBean(annotation.repository());
-                        MethodInterceptor delegate = new PostponesInterceptor(repository);
-                        delegatesForTarget.put(method, delegate);
-                    }
-                }
-            }
+        PostponesInterceptor postponesInterceptor = null;
+        Postponable annotation = AnnotationUtils.findAnnotation(method, Postponable.class);
+        if (annotation != null) {
+            postponesInterceptor = postponedMethodsCache.getPostponesInterceptor(target, method);
         }
-        return this.delegates.get(target).get(method);
+        return postponesInterceptor;
     }
 }

@@ -1,20 +1,17 @@
 package net.schowek.xis.example.storage;
 
-import java.util.Optional;
-
 import net.schowek.xis.spring.postpones.Invocation;
 import net.schowek.xis.spring.postpones.InvocationRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 import static net.schowek.xis.example.storage.InvocationDocument.Status.RUNNING;
 import static net.schowek.xis.example.storage.InvocationDocument.Status.WAITING;
-import static org.springframework.data.mongodb.core.query.Criteria.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
-import static org.springframework.data.mongodb.core.query.Update.*;
+import static org.springframework.data.mongodb.core.query.Update.update;
 
 @Repository
 public class MongoInvocationRepository implements InvocationRepository {

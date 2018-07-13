@@ -11,7 +11,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class HelloService {
     private static final Logger logger = getLogger(HelloService.class);
 
-    @Postponable(repository = MongoInvocationRepository.class)
+    @Postponable(repository = MongoInvocationRepository.class, methodQualifier = "HelloService::hello")
     public void hello(Greeting greeting) {
         logger.info("SAYING HELLO TO {}", greeting);
     }

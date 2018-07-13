@@ -6,17 +6,13 @@ import java.util.Arrays;
 public class Invocation {
     private final String id;
     private final Instant createdAt;
-    private final String clazz;
-    private final String method;
-    private final Class[] parameterTypes;
+    private final String methodQualifier;
     private final Object[] arguments;
 
-    public Invocation(String id, Instant createdAt, String clazz, String method, Class[] parameterTypes, Object[] arguments) {
+    public Invocation(String id, Instant createdAt, String methodQualifier, Object[] arguments) {
         this.id = id;
         this.createdAt = createdAt;
-        this.clazz = clazz;
-        this.method = method;
-        this.parameterTypes = parameterTypes;
+        this.methodQualifier = methodQualifier;
         this.arguments = arguments;
     }
 
@@ -28,16 +24,8 @@ public class Invocation {
         return createdAt;
     }
 
-    public Class[] getParameterTypes() {
-        return parameterTypes;
-    }
-
-    public String getClazz() {
-        return clazz;
-    }
-
-    public String getMethod() {
-        return method;
+    public String getMethodQualifier() {
+        return methodQualifier;
     }
 
     public Object[] getArguments() {
@@ -49,9 +37,7 @@ public class Invocation {
         return "Invocation{" +
                 "id='" + id + '\'' +
                 ", createdAt=" + createdAt +
-                ", clazz='" + clazz + '\'' +
-                ", method='" + method + '\'' +
-                ", parameterTypes=" + Arrays.toString(parameterTypes) +
+                ", methodQualifier='" + methodQualifier + '\'' +
                 ", arguments=" + Arrays.toString(arguments) +
                 '}';
     }

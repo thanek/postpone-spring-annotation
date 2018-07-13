@@ -1,31 +1,28 @@
 package net.schowek.xis.spring.postpones;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class PostponedOperationsInvoker {
     private static final Logger logger = getLogger(PostponedOperationsInvoker.class);
-    private final ApplicationContext applicationContext;
     private final InvocationRepository repository;
-    private final Map<Class, Object> beansCache = new HashMap<>();
+    private final PostponedMethodsScanner postponedMethods;
 
     @Autowired
-    public PostponedOperationsInvoker(ApplicationContext applicationContext, InvocationRepository repository) {
-        this.applicationContext = applicationContext;
+    public PostponedOperationsInvoker(InvocationRepository repository, PostponedMethodsScanner postponedMethods) {
         this.repository = repository;
+        this.postponedMethods = postponedMethods;
     }
 
     public void invokeQueued() {
@@ -35,16 +32,15 @@ public class PostponedOperationsInvoker {
                 repository.markAsDone(invocation);
             } catch (InvocationTargetException e) {
                 ReflectionUtils.rethrowRuntimeException(e.getTargetException());
-            } catch (ClassNotFoundException | NoSuchMethodException
-                    | IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 logger.error("Could not invoke {}:", invocation, e);
             }
         });
     }
 
-    private void invokeMethod(Invocation invocation) throws ClassNotFoundException, NoSuchMethodException,
-            IllegalAccessException, InvocationTargetException {
-        Object bean = getTargetBean(invocation);
+    private void invokeMethod(Invocation invocation) throws IllegalAccessException, InvocationTargetException {
+        PostponedMethod postponedMethod = postponedMethods.get(invocation.getMethodQualifier());
+        Object bean = postponedMethod.getTargetBean();
         Advisor postponeAdvisor = null;
         try {
             if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
@@ -52,7 +48,7 @@ public class PostponedOperationsInvoker {
             }
 
             logger.debug("Invoking {} on target {}", invocation, bean.getClass());
-            Method method = getDeclaredMethod(invocation, bean);
+            Method method = postponedMethod.getMethod();
             ReflectionUtils.makeAccessible(method);
             method.invoke(bean, invocation.getArguments());
         } finally {
@@ -60,19 +56,6 @@ public class PostponedOperationsInvoker {
                 ((Advised) bean).addAdvisor(postponeAdvisor);
             }
         }
-    }
-
-    private Method getDeclaredMethod(Invocation invocation, Object bean) throws NoSuchMethodException {
-        return bean.getClass().getDeclaredMethod(invocation.getMethod(), invocation.getParameterTypes());
-    }
-
-    private Object getTargetBean(Invocation invocation) throws ClassNotFoundException {
-        Class<?> beanClass = Class.forName(invocation.getClazz());
-        if (!beansCache.containsKey(beanClass)) {
-            beansCache.put(beanClass, applicationContext.getBean(beanClass));
-        }
-
-        return beansCache.get(beanClass);
     }
 
     private Advisor temporaryDisablePostponeAdvisor(Advised bean) {

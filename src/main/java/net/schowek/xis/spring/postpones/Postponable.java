@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Postponable {
     Class<? extends InvocationRepository> repository();
+    String methodQualifier() default "";
 }

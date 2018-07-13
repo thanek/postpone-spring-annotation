@@ -1,19 +1,23 @@
 package net.schowek.xis.spring.postpones;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import static java.time.Instant.now;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class PostponedMethodInvocationTests {
@@ -39,6 +43,15 @@ public class PostponedMethodInvocationTests {
     }
 
     @Test
+    public void shouldScanForAnnotatedMethods() {
+        PostponedMethodsScanner postponedMethodsScanner = context.getBean(PostponedMethodsScanner.class);
+
+        assertNotNull(postponedMethodsScanner.get("Test::doStuff"));
+        assertNotNull(postponedMethodsScanner.get(
+                "net.schowek.xis.spring.postpones.PostponedMethodInvocationTests.Service::doOtherStuff([])"));
+    }
+
+    @Test
     public void shouldPostponeMethodExecution() {
         Service service = context.getBean(Service.class);
         InMemoryRepository repository = context.getBean(InMemoryRepository.class);
@@ -52,12 +65,11 @@ public class PostponedMethodInvocationTests {
     @Test
     public void shouldRunPostponedMethods() {
         Service service = context.getBean(Service.class);
+        PostponedMethodsScanner postponedMethodsScanner = context.getBean(PostponedMethodsScanner.class);
         InMemoryRepository repository = context.getBean(InMemoryRepository.class);
-        repository.add(new Invocation("1", now(),
-                service.getClass().getCanonicalName(),
-                "doStuff", new Class[0], new Object[0]));
+        repository.add(new Invocation("1", now(), "Test::doStuff", new Object[0]));
 
-        PostponedOperationsInvoker methodInvoker = new PostponedOperationsInvoker(context, repository);
+        PostponedOperationsInvoker methodInvoker = new PostponedOperationsInvoker(repository, postponedMethodsScanner);
         methodInvoker.invokeQueued();
 
         assertTrue(service.isStuffDone());
@@ -67,6 +79,14 @@ public class PostponedMethodInvocationTests {
     @Configuration
     @EnablePostpones
     protected static class TestConfiguration {
+        @Autowired
+        ApplicationContext applicationContext;
+
+        @Bean
+        public PostponedMethodsScanner postponedMethodsScanner() {
+            return new PostponedMethodsScanner(applicationContext);
+        }
+
         @Bean
         public Service service() {
             return new Service();
@@ -86,8 +106,13 @@ public class PostponedMethodInvocationTests {
     public static class Service {
         private boolean stuffDone = false;
 
-        @Postponable(repository = InMemoryRepository.class)
+        @Postponable(repository = InMemoryRepository.class, methodQualifier = "Test::doStuff")
         public void doStuff() {
+            stuffDone = true;
+        }
+
+        @Postponable(repository = InMemoryRepository.class)
+        public void doOtherStuff() {
             stuffDone = true;
         }
 
