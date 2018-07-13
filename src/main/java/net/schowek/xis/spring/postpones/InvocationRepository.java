@@ -3,7 +3,7 @@ package net.schowek.xis.spring.postpones;
 import java.util.Optional;
 
 public interface InvocationRepository {
-    void save(Invocation invocation);
+    void add(Invocation invocation);
 
     Optional<Invocation> findFirst();
 

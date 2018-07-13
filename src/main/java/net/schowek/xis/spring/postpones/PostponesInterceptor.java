@@ -27,7 +27,7 @@ public class PostponesInterceptor implements MethodInterceptor {
                 methodInvocation.getArguments());
 
         logger.info("Postponing invocation {}", invocation);
-        repository.save(invocation);
+        repository.add(invocation);
 
         return null;
     }

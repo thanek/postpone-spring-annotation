@@ -13,6 +13,7 @@ public class InvocationDocument {
     private String method;
     private String[] parameterTypes;
     private Object[] arguments;
+    private Status status;
 
     public String getId() {
         return id;
@@ -60,5 +61,17 @@ public class InvocationDocument {
 
     public void setArguments(Object[] arguments) {
         this.arguments = arguments;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public static enum Status {
+        WAITING, RUNNING
     }
 }

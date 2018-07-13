@@ -53,7 +53,7 @@ public class PostponedMethodInvocationTests {
     public void shouldRunPostponedMethods() {
         Service service = context.getBean(Service.class);
         InMemoryRepository repository = context.getBean(InMemoryRepository.class);
-        repository.save(new Invocation("1", now(),
+        repository.add(new Invocation("1", now(),
                 service.getClass().getCanonicalName(),
                 "doStuff", new Class[0], new Object[0]));
 
@@ -103,7 +103,7 @@ public class PostponedMethodInvocationTests {
         private final List<Invocation> memory = new ArrayList<>();
 
         @Override
-        public void save(Invocation invocation) {
+        public void add(Invocation invocation) {
             memory.add(invocation);
         }
 
