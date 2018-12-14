@@ -24,16 +24,9 @@ curl localhost:8080/hello/world
 
 The `HelloController` tries to execute the `HelloService::hello` method which is marked as `@Postponable` so it won't be
 invoked immediately, instead the `MongoInvocationRepository` will store the method execution request in the MongoDB
-database.
+database and the `AutoPostponedOperationsInvoker` will fetch and execute it.
 
-To actually invoke the `hello` method:
-
-```
-curl localhost:8080/run
-```
-
-This will run the `PostponedMethodInvoker`'s invokeQueued method, so the stored method execution requests will actually be
-invoked. After the method finish, the entry in MongoDB is deleted (see `MongoInvocationRepository` implementation for
+After the method finish, the entry in MongoDB is deleted (see `MongoInvocationRepository` implementation for
 details).
 
 ## Requirements
