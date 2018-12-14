@@ -3,6 +3,7 @@ package net.schowek.xis.spring.postpones;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import javax.annotation.PostConstruct;
+
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -13,16 +14,35 @@ import org.springframework.aop.support.annotation.AnnotationMethodMatcher;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportAware;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ObjectUtils;
 
 @Configuration
-public class PostponesConfiguration extends AbstractPointcutAdvisor {
+public class PostponesConfiguration extends AbstractPointcutAdvisor implements ImportAware {
     private Pointcut pointcut;
     private Advice advice;
     private final ApplicationContext applicationContext;
+    @Nullable
+    private AnnotationAttributes enablePostpones;
 
     public PostponesConfiguration(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void setImportMetadata(AnnotationMetadata importMetadata) {
+        this.enablePostpones = AnnotationAttributes.fromMap(
+                importMetadata.getAnnotationAttributes(EnablePostpones.class.getName(), false));
+
+        if (this.enablePostpones == null) {
+            throw new IllegalArgumentException(
+                    "@EnablePostpones is not present on importing class " + importMetadata.getClassName());
+        }
     }
 
     @Bean
@@ -33,6 +53,22 @@ public class PostponesConfiguration extends AbstractPointcutAdvisor {
     @Bean
     public PostponedOperationsInvoker postponedOperationsInvoker() {
         return new PostponedOperationsInvoker(applicationContext.getBean(InvocationRepository.class), postponedMethodsScanner());
+    }
+
+    @Bean
+    public TaskExecutor postponedOperationsThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setThreadNamePrefix("postponed-operations-invoker");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    public AutoPostponedOperationsInvoker autoPostponedOperationsInvoker() {
+        boolean autoInvoke = this.enablePostpones.getBoolean("autoInvoke");
+        long sleepTime = this.enablePostpones.getNumber("sleepTime").longValue();
+        return new AutoPostponedOperationsInvoker(postponedOperationsInvoker(),
+                postponedOperationsThreadPoolTaskExecutor(), autoInvoke, sleepTime);
     }
 
     @PostConstruct

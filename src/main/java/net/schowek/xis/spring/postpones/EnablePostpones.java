@@ -13,4 +13,6 @@ import org.springframework.context.annotation.Import;
 @Import(PostponesConfiguration.class)
 public @interface EnablePostpones {
     Class<? extends InvocationRepository> repository();
+    boolean autoInvoke() default true;
+    long sleepTime() default 100;
 }
